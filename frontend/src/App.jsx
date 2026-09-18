@@ -8,8 +8,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Production Flask backend on Render
-const API = "https://gitlytics-1-nov2.onrender.com";
+// API URL comes from Vite environment variable
+const API = import.meta.env.VITE_API_URL || "";
 
 export default function App() {
   const [username, setUsername] = useState("");
@@ -89,8 +89,8 @@ export default function App() {
           <section className="welcome">
             <h2>Analyze a GitHub profile</h2>
             <p>
-              Enter a public GitHub username to view repository activity and
-              statistics.
+              Enter a public GitHub username to view repository activity
+              and statistics.
             </p>
           </section>
         )}
@@ -131,15 +131,8 @@ export default function App() {
                     <YAxis />
                     <Tooltip />
 
-                    <Bar
-                      dataKey="stars"
-                      name="Stars"
-                    />
-
-                    <Bar
-                      dataKey="forks"
-                      name="Forks"
-                    />
+                    <Bar dataKey="stars" name="Stars" />
+                    <Bar dataKey="forks" name="Forks" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -173,9 +166,7 @@ export default function App() {
                         </td>
 
                         <td>{repo.language || "—"}</td>
-
                         <td>{repo.stars}</td>
-
                         <td>{repo.forks}</td>
                       </tr>
                     ))}
