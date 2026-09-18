@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-const API = import.meta.env.VITE_API_URL || "";
+
+const API = "https://gitlytics-1-nov2.onrender.com";
 
 export default function App() {
   const [username, setUsername] = useState("");
