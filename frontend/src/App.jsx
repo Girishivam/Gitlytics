@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-
+// Production Flask backend on Render
 const API = "https://gitlytics-1-nov2.onrender.com";
 
 export default function App() {
@@ -12,16 +19,26 @@ export default function App() {
 
   async function analyze(e) {
     e.preventDefault();
+
     if (!username.trim()) return;
 
     setLoading(true);
     setError("");
+    setData(null);
+
     try {
       const response = await fetch(
-        `${API}/repositories?username=${encodeURIComponent(username.trim())}`
+        `${API}/api/repositories?username=${encodeURIComponent(
+          username.trim()
+        )}`
       );
+
       const json = await response.json();
-      if (!response.ok) throw new Error(json.error || "Request failed");
+
+      if (!response.ok) {
+        throw new Error(json.error || "Request failed");
+      }
+
       setData(json);
     } catch (err) {
       setError(err.message);
@@ -33,10 +50,14 @@ export default function App() {
 
   const chartData = useMemo(() => {
     if (!data) return [];
-    return data.repositories.slice(0, 10).map(r => ({
-      name: r.name.length > 14 ? r.name.slice(0, 14) + "…" : r.name,
-      stars: r.stars,
-      forks: r.forks
+
+    return data.repositories.slice(0, 10).map((repo) => ({
+      name:
+        repo.name.length > 14
+          ? repo.name.slice(0, 14) + "…"
+          : repo.name,
+      stars: repo.stars,
+      forks: repo.forks,
     }));
   }, [data]);
 
@@ -53,10 +74,11 @@ export default function App() {
         <form className="search" onSubmit={analyze}>
           <input
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter GitHub username (e.g. torvalds)"
           />
-          <button disabled={loading}>
+
+          <button type="submit" disabled={loading}>
             {loading ? "Analyzing..." : "Analyze"}
           </button>
         </form>
@@ -66,7 +88,10 @@ export default function App() {
         {!data && !loading && !error && (
           <section className="welcome">
             <h2>Analyze a GitHub profile</h2>
-            <p>Enter a public GitHub username to view repository activity and statistics.</p>
+            <p>
+              Enter a public GitHub username to view repository activity and
+              statistics.
+            </p>
           </section>
         )}
 
@@ -75,22 +100,46 @@ export default function App() {
             <h2>{data.username}'s GitHub Overview</h2>
 
             <section className="cards">
-              <Card label="Repositories" value={data.summary.repositories} />
-              <Card label="Total Stars" value={data.summary.stars} />
-              <Card label="Total Forks" value={data.summary.forks} />
-              <Card label="Languages" value={Object.keys(data.summary.languages).length} />
+              <Card
+                label="Repositories"
+                value={data.summary.repositories}
+              />
+
+              <Card
+                label="Total Stars"
+                value={data.summary.stars}
+              />
+
+              <Card
+                label="Total Forks"
+                value={data.summary.forks}
+              />
+
+              <Card
+                label="Languages"
+                value={Object.keys(data.summary.languages).length}
+              />
             </section>
 
             <section className="panel">
               <h3>Repository Stars & Forks</h3>
+
               <div className="chart">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="stars" name="Stars" />
-                    <Bar dataKey="forks" name="Forks" />
+
+                    <Bar
+                      dataKey="stars"
+                      name="Stars"
+                    />
+
+                    <Bar
+                      dataKey="forks"
+                      name="Forks"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -98,17 +147,35 @@ export default function App() {
 
             <section className="panel">
               <h3>Repositories</h3>
+
               <div className="tableWrap">
                 <table>
                   <thead>
-                    <tr><th>Repository</th><th>Language</th><th>Stars</th><th>Forks</th></tr>
+                    <tr>
+                      <th>Repository</th>
+                      <th>Language</th>
+                      <th>Stars</th>
+                      <th>Forks</th>
+                    </tr>
                   </thead>
+
                   <tbody>
-                    {data.repositories.map(repo => (
+                    {data.repositories.map((repo) => (
                       <tr key={repo.full_name}>
-                        <td><a href={repo.html_url} target="_blank">{repo.name}</a></td>
+                        <td>
+                          <a
+                            href={repo.html_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {repo.name}
+                          </a>
+                        </td>
+
                         <td>{repo.language || "—"}</td>
+
                         <td>{repo.stars}</td>
+
                         <td>{repo.forks}</td>
                       </tr>
                     ))}
@@ -124,5 +191,10 @@ export default function App() {
 }
 
 function Card({ label, value }) {
-  return <div className="card"><span>{label}</span><strong>{value}</strong></div>;
+  return (
+    <div className="card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
 }
